@@ -1,0 +1,57 @@
+query GetResourceAllocations {
+  resource_allocations(order_by: { start_time: desc }) {
+    id
+    allocated_quantity
+    start_time
+    end_time
+    notes
+    order {
+      id
+      order_number
+      product_name
+      status
+    }
+    resource {
+      id
+      name
+      type
+      status
+    }
+  }
+}
+
+mutation AllocateResource(
+  $order_id: uuid!
+  $resource_id: uuid!
+  $allocated_quantity: numeric!
+  $start_time: timestamptz!
+  $end_time: timestamptz
+  $notes: String
+) {
+  insert_resource_allocations_one(
+    object: {
+      order_id: $order_id
+      resource_id: $resource_id
+      allocated_quantity: $allocated_quantity
+      start_time: $start_time
+      end_time: $end_time
+      notes: $notes
+    }
+  ) {
+    id
+    allocated_quantity
+    start_time
+    order {
+      order_number
+    }
+    resource {
+      name
+    }
+  }
+}
+
+mutation RemoveResourceAllocation($id: uuid!) {
+  delete_resource_allocations_by_pk(id: $id) {
+    id
+  }
+}

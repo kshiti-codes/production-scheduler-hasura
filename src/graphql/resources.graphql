@@ -1,0 +1,76 @@
+query GetResources {
+  resources(order_by: { type: asc, name: asc }) {
+    id
+    name
+    type
+    status
+    capacity
+    hourly_cost
+    description
+    created_at
+    resource_allocations_aggregate {
+      aggregate {
+        count
+        sum {
+          allocated_quantity
+        }
+      }
+    }
+  }
+}
+
+query GetResourcesByType($type: resource_type!) {
+  resources(where: { type: { _eq: $type } }, order_by: { name: asc }) {
+    id
+    name
+    status
+    capacity
+    hourly_cost
+  }
+}
+
+subscription WatchResources {
+  resources(order_by: { type: asc, name: asc }) {
+    id
+    name
+    type
+    status
+    resource_allocations_aggregate {
+      aggregate {
+        count
+      }
+    }
+  }
+}
+
+mutation UpdateResourceStatus($id: uuid!, $status: resource_status!) {
+  update_resources_by_pk(pk_columns: { id: $id }, _set: { status: $status }) {
+    id
+    name
+    status
+    updated_at
+  }
+}
+
+mutation CreateResource(
+  $name: String!
+  $type: resource_type!
+  $capacity: numeric
+  $hourly_cost: numeric
+  $description: String
+) {
+  insert_resources_one(
+    object: {
+      name: $name
+      type: $type
+      capacity: $capacity
+      hourly_cost: $hourly_cost
+      description: $description
+    }
+  ) {
+    id
+    name
+    type
+    status
+  }
+}

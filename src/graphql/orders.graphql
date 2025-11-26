@@ -1,0 +1,136 @@
+query GetProductionOrders {
+  production_orders(order_by: { priority: desc, scheduled_start: asc }) {
+    id
+    order_number
+    product_name
+    quantity
+    status
+    priority
+    scheduled_start
+    scheduled_end
+    actual_start
+    actual_end
+    notes
+    created_at
+    updated_at
+    resource_allocations {
+      id
+      allocated_quantity
+      start_time
+      end_time
+      resource {
+        id
+        name
+        type
+        status
+      }
+    }
+    order_events_aggregate {
+      aggregate {
+        count
+      }
+    }
+  }
+}
+
+query GetOrderById($id: uuid!) {
+  production_orders_by_pk(id: $id) {
+    id
+    order_number
+    product_name
+    quantity
+    status
+    priority
+    scheduled_start
+    scheduled_end
+    actual_start
+    actual_end
+    notes
+    created_at
+    updated_at
+    resource_allocations {
+      id
+      allocated_quantity
+      start_time
+      end_time
+      notes
+      resource {
+        id
+        name
+        type
+        status
+        capacity
+        hourly_cost
+      }
+    }
+    order_events(order_by: { created_at: desc }) {
+      id
+      event_type
+      old_status
+      new_status
+      changed_by
+      metadata
+      created_at
+    }
+  }
+}
+
+subscription WatchProductionOrders {
+  production_orders(order_by: { priority: desc, scheduled_start: asc }) {
+    id
+    order_number
+    product_name
+    quantity
+    status
+    priority
+    scheduled_start
+    scheduled_end
+    updated_at
+  }
+}
+
+mutation UpdateOrderStatus($id: uuid!, $status: order_status!) {
+  update_production_orders_by_pk(
+    pk_columns: { id: $id }
+    _set: { status: $status }
+  ) {
+    id
+    order_number
+    status
+    updated_at
+  }
+}
+
+mutation CreateProductionOrder(
+  $order_number: String!
+  $product_name: String!
+  $quantity: Int!
+  $priority: Int!
+  $scheduled_start: timestamptz
+  $scheduled_end: timestamptz
+  $notes: String
+) {
+  insert_production_orders_one(
+    object: {
+      order_number: $order_number
+      product_name: $product_name
+      quantity: $quantity
+      priority: $priority
+      scheduled_start: $scheduled_start
+      scheduled_end: $scheduled_end
+      notes: $notes
+    }
+  ) {
+    id
+    order_number
+    product_name
+    status
+  }
+}
+
+mutation DeleteProductionOrder($id: uuid!) {
+  delete_production_orders_by_pk(id: $id) {
+    id
+    order_number
+  }
+}
